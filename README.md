@@ -36,4 +36,8 @@ adapters for executing SQL queries over Cassandra, Druid,
 Elasticsearch, MongoDB, Kafka, and others, with minimal
 configuration.
 
+The `hive-ddl` branch extended the official code for parsing HIVE DDL statement,  
+
+please feel free to try it in your own projects.
+
 For more details, see the [home page](http://calcite.apache.org).
