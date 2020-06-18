@@ -44,16 +44,18 @@ public class SqlColumnDeclaration extends SqlCall {
   public final SqlDataTypeSpec dataType;
   public final SqlNode expression;
   public final ColumnStrategy strategy;
+  public final SqlNode comment;
 
   /** Creates a SqlColumnDeclaration; use {@link SqlDdlNodes#column}. */
   SqlColumnDeclaration(SqlParserPos pos, SqlIdentifier name,
       SqlDataTypeSpec dataType, SqlNode expression,
-      ColumnStrategy strategy) {
+      ColumnStrategy strategy, SqlNode comment) {
     super(pos);
     this.name = name;
     this.dataType = dataType;
     this.expression = expression;
     this.strategy = strategy;
+    this.comment = comment;
   }
 
   @Override public SqlOperator getOperator() {
@@ -61,6 +63,9 @@ public class SqlColumnDeclaration extends SqlCall {
   }
 
   @Override public List<SqlNode> getOperandList() {
+    if (comment != null) {
+      return ImmutableList.of(name, dataType, comment);
+    }
     return ImmutableList.of(name, dataType);
   }
 

@@ -32,8 +32,7 @@ public abstract class SqlCreate extends SqlDdl {
   public final boolean ifNotExists;
 
   /** Creates a SqlCreate. */
-  public SqlCreate(SqlOperator operator, SqlParserPos pos, boolean replace,
-      boolean ifNotExists) {
+  public SqlCreate(SqlOperator operator, SqlParserPos pos, boolean replace, boolean ifNotExists) {
     super(operator, pos);
     this.replace = replace;
     this.ifNotExists = ifNotExists;

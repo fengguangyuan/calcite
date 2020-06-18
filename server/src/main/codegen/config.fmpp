@@ -31,6 +31,7 @@ data: {
 
     # List of keywords.
     keywords: [
+      "COMMENT"
       "IF"
       "MATERIALIZED"
       "STORED"
@@ -38,6 +39,7 @@ data: {
       "JAR"
       "FILE"
       "ARCHIVE"
+      "PARTITIONED"
     ]
 
     # List of keywords from "keywords" section that are not reserved.
@@ -413,6 +415,7 @@ data: {
       "SqlCreateType"
       "SqlCreateView"
       "SqlCreateFunction"
+      "SqlCreateTemporaryExternalTable"
     ]
 
     # List of methods for parsing extensions to "DROP" calls.

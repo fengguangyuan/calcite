@@ -57,10 +57,12 @@ public class SqlDdlNodes {
 
   /** Creates a CREATE TABLE. */
   public static SqlCreateTable createTable(SqlParserPos pos, boolean replace,
-      boolean ifNotExists, SqlIdentifier name, SqlNodeList columnList,
-      SqlNode query) {
-    return new SqlCreateTable(pos, replace, ifNotExists, name, columnList,
-        query);
+      boolean temporary, boolean external, boolean ifNotExists,
+      SqlIdentifier name, SqlNodeList columnList, SqlNode query,
+      SqlNode comment, SqlNode rowFormat, SqlNode fileFormat,
+      SqlNodeList partElementList) {
+    return new SqlCreateTable(pos, replace, temporary, external, ifNotExists, name, columnList,
+        query, comment, rowFormat, fileFormat, partElementList);
   }
 
   /** Creates a CREATE VIEW. */
@@ -124,7 +126,12 @@ public class SqlDdlNodes {
   /** Creates a column declaration. */
   public static SqlNode column(SqlParserPos pos, SqlIdentifier name,
       SqlDataTypeSpec dataType, SqlNode expression, ColumnStrategy strategy) {
-    return new SqlColumnDeclaration(pos, name, dataType, expression, strategy);
+    return new SqlColumnDeclaration(pos, name, dataType, expression, strategy, null);
+  }
+
+  public static SqlNode column(SqlParserPos pos, SqlIdentifier name,
+      SqlDataTypeSpec dataType, SqlNode expression, ColumnStrategy strategy, SqlNode comment) {
+    return new SqlColumnDeclaration(pos, name, dataType, expression, strategy, comment);
   }
 
   /** Creates a attribute definition. */

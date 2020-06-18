@@ -126,6 +126,7 @@ void TableElement(List<SqlNode> list) :
     final SqlNodeList columnList;
     final Span s = Span.of();
     final ColumnStrategy strategy;
+    SqlNode comment = null;
 }
 {
     LOOKAHEAD(2) id = SimpleIdentifier()
@@ -153,10 +154,15 @@ void TableElement(List<SqlNode> list) :
                     : ColumnStrategy.NOT_NULLABLE;
             }
         )
+        [ <COMMENT> <QUOTED_STRING> {
+            String p = SqlParserUtil.parseString(token.image);
+            comment = SqlLiteral.createCharString(p, "UTF8", getPos());
+            }
+        ]
         {
             list.add(
                 SqlDdlNodes.column(s.add(id).end(this), id,
-                    type.withNullable(nullable), e, strategy));
+                    type.withNullable(nullable), e, strategy, comment));
         }
     |
         { list.add(id); }
@@ -248,14 +254,85 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
     final SqlIdentifier id;
     SqlNodeList tableElementList = null;
     SqlNode query = null;
+    SqlNode comment = null;
+    SqlNode rowFormat = null;
+    SqlNode fileFormat = null;
+    SqlNodeList partElementList = null;
 }
 {
     <TABLE> ifNotExists = IfNotExistsOpt() id = CompoundIdentifier()
     [ tableElementList = TableElementList() ]
     [ <AS> query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY) ]
+    { String charset = null; }
+    [ <COMMENT>
+        (
+            <QUOTED_STRING>
+            { charset = "UTF8"; }
+        |
+            <PREFIXED_STRING_LITERAL>
+            { charset = SqlParserUtil.getCharacterSet(token.image); }
+        )
+        {
+            String p = SqlParserUtil.parseString(token.image);
+            comment = SqlLiteral.createCharString(p, charset, getPos());
+        }
+    ]
+    [ <ROW> <FORMAT> rowFormat = StringLiteral() ]
+    [ <STORED> <AS> fileFormat = StringLiteral() ]
+    [ <PARTITIONED> <BY> partElementList = TableElementList() ]
     {
-        return SqlDdlNodes.createTable(s.end(this), replace, ifNotExists, id,
-            tableElementList, query);
+        return SqlDdlNodes.createTable(s.end(this), false, false, replace, ifNotExists, id,
+            tableElementList, query, comment, rowFormat, fileFormat, partElementList);
+    }
+}
+
+SqlCreate SqlCreateTemporaryExternalTable(Span s, boolean replace) :
+{
+    boolean temporary;
+    boolean external;
+    final boolean ifNotExists;
+    final SqlIdentifier id;
+    SqlNodeList tableElementList = null;
+    SqlNode query = null;
+    SqlNode comment = null;
+    SqlNode rowFormat = null;
+    SqlNode fileFormat = null;
+    SqlNodeList partElementList = null;
+}
+{
+    (
+        <TEMPORARY> { temporary = true; }
+    |
+        { temporary = false; }
+    )
+    (
+        <EXTERNAL> { external = true; }
+    |
+        { external = false; }
+    )
+    <TABLE> ifNotExists = IfNotExistsOpt() id = CompoundIdentifier()
+    [ tableElementList = TableElementList() ]
+    [ <AS> query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY) ]
+    { String charset = null; }
+    [ <COMMENT>
+        (
+            <QUOTED_STRING>
+            { charset = "UTF8"; }
+        |
+            <PREFIXED_STRING_LITERAL>
+            { charset = SqlParserUtil.getCharacterSet(token.image); }
+        )
+        {
+            String p = SqlParserUtil.parseString(token.image);
+            comment = SqlLiteral.createCharString(p, charset, getPos());
+        }
+    ]
+    [ <ROW> <FORMAT> rowFormat = StringLiteral() ]
+    [ <STORED> <AS> fileFormat = StringLiteral() ]
+    [ <PARTITIONED> <BY> partElementList = TableElementList() ]
+    {
+        return SqlDdlNodes.createTable(s.end(this), temporary, external, replace, ifNotExists, id,
+            tableElementList, query, comment, rowFormat, fileFormat, partElementList);
     }
 }
 

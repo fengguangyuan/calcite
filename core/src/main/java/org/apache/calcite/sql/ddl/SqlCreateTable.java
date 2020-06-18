@@ -34,28 +34,71 @@ import java.util.Objects;
  * Parse tree for {@code CREATE TABLE} statement.
  */
 public class SqlCreateTable extends SqlCreate {
+  public final boolean temporary;
+  public final boolean external;
   public final SqlIdentifier name;
   public final SqlNodeList columnList;
   public final SqlNode query;
+  public final SqlNode comment;
+  public final SqlNode rowFormat;
+  public final SqlNode fileFormat;
+  public final SqlNodeList partElementList;
 
   private static final SqlOperator OPERATOR =
       new SqlSpecialOperator("CREATE TABLE", SqlKind.CREATE_TABLE);
 
-  /** Creates a SqlCreateTable. */
   protected SqlCreateTable(SqlParserPos pos, boolean replace, boolean ifNotExists,
       SqlIdentifier name, SqlNodeList columnList, SqlNode query) {
     super(OPERATOR, pos, replace, ifNotExists);
+    this.temporary = false;
+    this.external = false;
     this.name = Objects.requireNonNull(name);
     this.columnList = columnList; // may be null
     this.query = query; // for "CREATE TABLE ... AS query"; may be null
+    this.comment = null;
+    this.rowFormat = null;
+    this.fileFormat = null;
+    this.partElementList = null;
+  }
+
+  /** Creates a SqlCreateTable. */
+  protected SqlCreateTable(SqlParserPos pos, boolean temporary, boolean external,
+      boolean replace, boolean ifNotExists, SqlIdentifier name,
+      SqlNodeList columnList, SqlNode query, SqlNode comment,
+      SqlNode rowFormat, SqlNode fileFormat, SqlNodeList partElementList) {
+    super(OPERATOR, pos, replace, ifNotExists);
+    this.temporary = temporary;
+    this.external = external;
+    this.name = Objects.requireNonNull(name);
+    this.columnList = columnList; // may be null
+    this.query = query; // for "CREATE TABLE ... AS query"; may be null
+    this.comment = comment;
+    this.rowFormat = rowFormat;
+    this.fileFormat = fileFormat;
+    this.partElementList = partElementList;
   }
 
   public List<SqlNode> getOperandList() {
-    return ImmutableNullableList.of(name, columnList, query);
+    return ImmutableNullableList.of(name, columnList, query, comment,
+        rowFormat, fileFormat, partElementList);
+  }
+
+  public boolean isTemporary() {
+    return this.temporary;
+  }
+
+  public boolean isExternal() {
+    return this.external;
   }
 
   @Override public void unparse(SqlWriter writer, int leftPrec, int rightPrec) {
     writer.keyword("CREATE");
+    if (temporary) {
+      writer.keyword("TEMPORARY");
+    }
+    if (external) {
+      writer.keyword("EXTERNAL");
+    }
     writer.keyword("TABLE");
     if (ifNotExists) {
       writer.keyword("IF NOT EXISTS");
@@ -73,6 +116,35 @@ public class SqlCreateTable extends SqlCreate {
       writer.keyword("AS");
       writer.newlineAndIndent();
       query.unparse(writer, 0, 0);
+    }
+
+    if (comment != null) {
+      writer.newlineAndIndent();
+      writer.keyword("COMMENT");
+      comment.unparse(writer, 0, 0);
+    }
+
+    if (rowFormat != null) {
+      writer.newlineAndIndent();
+      writer.keyword("ROW FORMAT");
+      rowFormat.unparse(writer, 0, 0);
+    }
+
+    if (fileFormat != null) {
+      writer.newlineAndIndent();
+      writer.keyword("STORED AS");
+      fileFormat.unparse(writer, 0, 0);
+    }
+
+    if (partElementList != null) {
+      writer.newlineAndIndent();
+      writer.keyword("PARTITIONED BY");
+      SqlWriter.Frame frame = writer.startList("(", ")");
+      for (SqlNode c : partElementList) {
+        writer.sep(",");
+        c.unparse(writer, 0, 0);
+      }
+      writer.endList(frame);
     }
   }
 }

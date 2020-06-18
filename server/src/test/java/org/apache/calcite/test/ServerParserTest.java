@@ -106,6 +106,50 @@ class ServerParserTest extends SqlParserTest {
   @Test void testCreateTable() {
     sql("create table x (i int not null, j varchar(5) null)")
         .ok("CREATE TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))");
+    sql("create temporary table x (i int not null, j varchar(5) null) ")
+        .ok("CREATE TEMPORARY TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))");
+    sql("create external table x (i int not null, j varchar(5) null) ")
+        .ok("CREATE EXTERNAL TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))");
+    sql("create temporary external table x (i int not null, j varchar(5) null)")
+        .ok("CREATE TEMPORARY EXTERNAL TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))");
+    sql("create table x (i int not null comment '这个是主键哦', j varchar(5) null)")
+        .ok("CREATE TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))");
+    sql("create table x (i int not null comment 'dd', j varchar(5) null)")
+        .ok("CREATE TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))");
+    String expected = "CREATE TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))\n"
+        + "COMMENT _UTF8'\u6211\u81ea\u5df1\u7684\u8868'\n"
+        + "ROW FORMAT 'custom'";
+    sql("create table x (i int not null comment '', j varchar(5) null)"
+        + "comment '我自己的表' row format 'custom'")
+        .ok(expected);
+    expected = "CREATE TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))\n"
+        + "ROW FORMAT 'custom'\n"
+        + "STORED AS '/tmp/t.csv'";
+    sql("create table x (i int not null comment '', j varchar(5) null) "
+        + "row format 'custom' stored as '/tmp/t.csv'")
+        .ok(expected);
+    expected = "CREATE TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))\n"
+        + "COMMENT _UTF8'normal chars'\n"
+        + "ROW FORMAT 'custom'\n"
+        + "STORED AS '/tmp/t.csv'";
+    sql("create table x (i int not null comment '', j varchar(5) null) "
+        + "comment 'normal chars' row format 'custom' stored as '/tmp/t.csv'")
+        .ok(expected);
+    expected = "CREATE TABLE `X` (`I` INTEGER NOT NULL, `J` VARCHAR(5))\n"
+        + "COMMENT _UTF8'normal chars'\n"
+        + "ROW FORMAT 'custom'\n"
+        + "STORED AS '/tmp/t.csv'\n"
+        + "PARTITIONED BY (`DT` `STRING`, `HM` `STRING`)";
+    sql("create table x (i int not null comment '', j varchar(5) null) "
+        + "comment 'normal chars' row format 'custom' stored as '/tmp/t.csv' "
+        + "partitioned by (dt string, hm string)")
+        .ok(expected);
+    expected = "CREATE TABLE `X` AS\n"
+        + "SELECT *\n"
+        + "FROM `EMP`\n"
+        + "ROW FORMAT 'custom'";
+    sql("create table x as select * from emp row format 'custom'")
+        .ok(expected);
   }
 
   @Test void testCreateTableAsSelect() {
