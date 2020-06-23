@@ -40,6 +40,7 @@ data: {
       "FILE"
       "ARCHIVE"
       "PARTITIONED"
+      "COLUMNS"
     ]
 
     # List of keywords from "keywords" section that are not reserved.
@@ -403,6 +404,7 @@ data: {
     # List of methods for parsing extensions to "ALTER <scope>" calls.
     # Each must accept arguments "(SqlParserPos pos, String scope)".
     alterStatementParserMethods: [
+      "SqlAlterTable"
     ]
 
     # List of methods for parsing extensions to "CREATE [OR REPLACE]" calls.

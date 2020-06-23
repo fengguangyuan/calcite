@@ -248,6 +248,24 @@ SqlCreate SqlCreateType(Span s, boolean replace) :
     }
 }
 
+SqlAlter SqlAlterTable(Span s, String scope) :
+{
+    final SqlIdentifier id;
+    SqlNodeList tableElementList = null;
+    boolean cascade = false;
+}
+{
+    <TABLE> id = CompoundIdentifier()
+    <ADD> <COLUMNS>
+    tableElementList = TableElementList()
+    [ <CASCADE> { cascade = true; } ]
+    {
+        // always set scope as empty
+        return SqlDdlNodes.alterTable(s.end(this), "", id, tableElementList, cascade);
+    }
+}
+
+
 SqlCreate SqlCreateTable(Span s, boolean replace) :
 {
     final boolean ifNotExists;

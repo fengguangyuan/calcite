@@ -26,8 +26,6 @@ import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
-
-
 /**
  * Utilities concerning {@link SqlNode} for DDL.
  */
@@ -53,6 +51,11 @@ public class SqlDdlNodes {
       SqlIdentifier name, SqlNodeList attributeList,
       SqlDataTypeSpec dataTypeSpec) {
     return new SqlCreateType(pos, replace, name, attributeList, dataTypeSpec);
+  }
+
+  public static SqlAlterTable alterTable(SqlParserPos pos, String scope,
+      SqlIdentifier name, SqlNodeList columnList, boolean cascade) {
+    return new SqlAlterTable(pos, scope, name, columnList, cascade);
   }
 
   /** Creates a CREATE TABLE. */

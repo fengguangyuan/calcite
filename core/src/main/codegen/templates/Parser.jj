@@ -3915,7 +3915,7 @@ String Scope() :
 {
 }
 {
-    ( <SYSTEM> | <SESSION> ) { return token.image.toUpperCase(Locale.ROOT); }
+    [ <SYSTEM> | <SESSION> ] { return token.image.toUpperCase(Locale.ROOT); }
 }
 
 <#if parser.createStatementParserMethods?size != 0>
